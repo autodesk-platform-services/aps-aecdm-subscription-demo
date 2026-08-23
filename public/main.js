@@ -254,12 +254,15 @@ async function fetchAndShowDiff(id, startVersion) {
 
         const table = document.createElement('table');
         table.id = 'diffTable';
-        table.innerHTML = `<thead><tr><th>Type</th><th>Element</th><th>Details</th></tr></thead><tbody></tbody>`;
+        table.innerHTML = `<thead><tr><th>Type</th><th>Element (Family Name + Name)</th><th>Revit Element ID</th><th>Details</th></tr></thead><tbody></tbody>`;
         const tbody = table.querySelector('tbody');
 
         for (const change of result) {
             const tr = document.createElement('tr');
             const elementName = escapeHtml(change.element?.name || 'Unknown');
+            const familyName = escapeHtml(getPropertyValue(change.element, 'Family Name'));
+            const revitElementId = escapeHtml(getPropertyValue(change.element, 'Revit Element ID'));
+            const elementDisplay = familyName !== '—' ? `${familyName} + ${elementName}` : elementName;
             let details = '';
 
             if (change.differences?.results) {
@@ -269,7 +272,7 @@ async function fetchAndShowDiff(id, startVersion) {
                 details = props || 'No property changes';
             }
 
-            tr.innerHTML = `<td>${change.type}</td><td>${elementName}</td><td>${details}</td>`;
+            tr.innerHTML = `<td>${change.type}</td><td>${elementDisplay}</td><td>${revitElementId}</td><td>${details}</td>`;
             tbody.appendChild(tr);
         }
 
