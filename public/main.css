@@ -36,10 +36,20 @@ main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap:
 .log-entry.type-pollingUpdate { color: #b48ee0; }
 .log-entry.type-unparsed { color: #999; font-style: italic; }
 
-#elementsTable, #diffTable { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
-#elementsTable th, #elementsTable td, #diffTable th, #diffTable td { padding: 6px 8px; border: 1px solid #ddd; text-align: left; }
-#elementsTable th, #diffTable th { background: #f5f5f5; font-weight: 600; }
-#elementsTable tbody tr:hover, #diffTable tbody tr:hover { background: #f9f9f9; }
+#elementsTable { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+#elementsTable th, #elementsTable td { padding: 6px 8px; border: 1px solid #ddd; text-align: left; }
+#elementsTable th { background: #f5f5f5; font-weight: 600; position: sticky; top: 0; }
+#elementsTable tbody tr:hover { background: #f9f9f9; }
+
+#elements table { display: block; overflow-y: auto; max-height: 250px; border: 1px solid #ddd; border-radius: 4px; }
+#elements thead { display: table; width: 100%; table-layout: fixed; }
+#elements tbody { display: block; overflow-y: scroll; }
+#elements tr { display: table; width: 100%; table-layout: fixed; }
+
+#diffTable { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+#diffTable th, #diffTable td { padding: 6px 8px; border: 1px solid #ddd; text-align: left; }
+#diffTable th { background: #f5f5f5; font-weight: 600; }
+#diffTable tbody tr:hover { background: #f9f9f9; }
 
 .pagination-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; font-size: 13px; }
 .pagination-controls button { padding: 4px 10px; font-size: 12px; }
