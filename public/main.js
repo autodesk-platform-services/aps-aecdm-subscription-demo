@@ -221,10 +221,9 @@ function renderElementsTable(instances) {
     for (const el of instances) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${escapeHtml(el.name)}</td>
-            <td>${escapeHtml(getPropertyValue(el, 'External ID'))}</td>
             <td>${escapeHtml(getPropertyValue(el, 'Revit Category Type Id'))}</td>
             <td>${escapeHtml(getPropertyValue(el, 'Family Name'))}</td>
+            <td>${escapeHtml(el.name)}</td>
             <td>${escapeHtml(getPropertyValue(el, 'Revit Element ID'))}</td>
         `;
         tbody.appendChild(tr);
