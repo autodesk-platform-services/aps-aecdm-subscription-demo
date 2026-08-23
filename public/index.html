@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="https://cdn.autodesk.io/favicon.ico">
+    <link rel="stylesheet" href="/main.css">
+    <script src="/main.js" type="module"></script>
+    <title>AEC Data Model — Extraction Status Subscriptions Demo</title>
+</head>
+<body>
+    <header>
+        <img class="logo" src="https://cdn.autodesk.io/logo/black/stacked.png" alt="Autodesk Platform Services">
+        <span class="title">AEC Data Model — Extraction Status Subscriptions</span>
+        <button id="login" style="visibility: hidden;">Login</button>
+    </header>
+
+    <main>
+        <section id="setup" class="panel">
+            <h2>1. Target</h2>
+            <label>Hub
+                <select id="hubSelect"><option value="">Select a hub…</option></select>
+            </label>
+            <label>Project
+                <select id="projectSelect" disabled><option value="">Select a project…</option></select>
+            </label>
+            <label>…or track one known file directly by fileUrn
+                <input id="fileUrnInput" type="text" placeholder="urn:adsk.wipstg:dm.lineage:...">
+            </label>
+        </section>
+
+        <section id="controls" class="panel">
+            <h2>2. Subscribe</h2>
+            <div class="button-row">
+                <button id="subscribeProject" disabled>Subscribe by Project (discover files)</button>
+                <button id="subscribeFile" disabled>Subscribe by File</button>
+                <button id="stopSubscription" disabled>Stop</button>
+                <button id="simulateDisconnect" disabled>Simulate Disconnect</button>
+            </div>
+            <label class="checkbox-row">
+                <input type="checkbox" id="compareWithPolling">
+                Compare with polling (runs the legacy poll loop in parallel, file mode only)
+            </label>
+        </section>
+
+        <section id="files" class="panel">
+            <h2>3. Discovered Files</h2>
+            <p class="hint">Publish or sync a Revit model in this project. Once AEC Data Model finishes extracting it, it shows up here — click a row to track it.</p>
+            <div id="fileList" class="file-list"></div>
+        </section>
+
+        <section id="tracked" class="panel hidden">
+            <h2>4. Tracked File</h2>
+            <div id="trackedSummary"></div>
+        </section>
+
+        <section id="elements" class="panel hidden">
+            <h2>5. elementsByElementGroup (auto-fired on first extraction)</h2>
+            <pre id="elementsResult"></pre>
+        </section>
+
+        <section id="diff" class="panel hidden">
+            <h2>6. diffElementGroupByVersionWithLatest (auto-fired on every later change)</h2>
+            <pre id="diffResult"></pre>
+        </section>
+
+        <section id="log" class="panel">
+            <h2>Event Log</h2>
+            <div id="eventLog" class="log-panel"></div>
+        </section>
+
+        <section id="pollingComparison" class="panel hidden">
+            <h2>Polling Comparison</h2>
+            <div id="pollingStats"></div>
+            <div id="pollingLog" class="log-panel"></div>
+        </section>
+    </main>
+</body>
+</html>
