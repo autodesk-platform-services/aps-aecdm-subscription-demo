@@ -5,10 +5,12 @@ import {
   ELEMENT_GROUP_EXTRACTION_STATUS,
 } from './queries.js';
 
-export async function getElementsByElementGroup(elementGroupId, limit = 20) {
+export async function getElementsByElementGroup(elementGroupId, limit = 50, cursor = null) {
+  const pagination = { limit };
+  if (cursor) pagination.cursor = cursor;
   const data = await query(ELEMENTS_BY_ELEMENT_GROUP, {
     elementGroupId,
-    pagination: { limit },
+    pagination,
   });
   return data.elementsByElementGroup;
 }

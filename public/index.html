@@ -55,13 +55,22 @@
         </section>
 
         <section id="elements" class="panel hidden">
-            <h2>5. elementsByElementGroup (auto-fired on first extraction)</h2>
-            <pre id="elementsResult"></pre>
+            <h2>5. Elements (Instance context)</h2>
+            <div class="pagination-controls">
+                <button id="elementsPrevious" disabled>← Previous</button>
+                <span id="elementsPageInfo"></span>
+                <button id="elementsNext" disabled>Next →</button>
+            </div>
+            <table id="elementsTable">
+                <thead><tr><th>Element Name</th><th>External ID</th><th>Revit Category Type ID</th><th>Family Name</th><th>Revit Element ID</th></tr></thead>
+                <tbody></tbody>
+            </table>
         </section>
 
         <section id="diff" class="panel hidden">
-            <h2>6. diffElementGroupByVersionWithLatest (auto-fired on every later change)</h2>
-            <pre id="diffResult"></pre>
+            <h2>6. Changes Summary</h2>
+            <div id="diffSummary"></div>
+            <div id="diffChangesList"></div>
         </section>
 
         <section id="log" class="panel">

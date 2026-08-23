@@ -128,7 +128,8 @@ app.post('/api/subscriptions/kill', (req, res) => {
 // --- Element group queries, fired by the browser once it decides a SUCCESS event matters ---
 app.get('/api/element-groups/:id/elements', async (req, res) => {
   try {
-    res.json(await getElementsByElementGroup(req.params.id));
+    const cursor = req.query.cursor || null;
+    res.json(await getElementsByElementGroup(req.params.id, 50, cursor));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

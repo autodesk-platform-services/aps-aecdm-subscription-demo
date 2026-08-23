@@ -12,9 +12,13 @@ const els = {
     tracked: document.getElementById('tracked'),
     trackedSummary: document.getElementById('trackedSummary'),
     elements: document.getElementById('elements'),
-    elementsResult: document.getElementById('elementsResult'),
+    elementsPrevious: document.getElementById('elementsPrevious'),
+    elementsNext: document.getElementById('elementsNext'),
+    elementsPageInfo: document.getElementById('elementsPageInfo'),
+    elementsTable: document.getElementById('elementsTable'),
     diff: document.getElementById('diff'),
-    diffResult: document.getElementById('diffResult'),
+    diffSummary: document.getElementById('diffSummary'),
+    diffChangesList: document.getElementById('diffChangesList'),
     eventLog: document.getElementById('eventLog'),
     pollingComparison: document.getElementById('pollingComparison'),
     pollingStats: document.getElementById('pollingStats'),
@@ -32,6 +36,9 @@ let fileClientId = null;
 let pollingTimer = null;
 let pollingStartedAt = null;
 let pollingRequestCount = 0;
+
+let elementsPaginationStack = [];  // [ { cursor, data }, ... ]
+let elementsPaginationIndex = 0;
 
 // Files discovered via the project-wide subscription (or the direct file subscription), keyed
 // by elementGroup id. `extractionCount` distinguishes "first extraction we've ever seen for this
@@ -176,27 +183,99 @@ function onExtractionSuccess(elementGroup, fallbackFileUrn) {
     fetchAndShowDiff(id, sinceVersion);
 }
 
-async function fetchAndShowElements(id) {
+function getPropertyValue(element, propName) {
+    const prop = (element.properties?.results || []).find(p => p.name === propName);
+    return prop?.value ?? '—';
+}
+
+function filterInstanceElements(data) {
+    return (data.results || []).filter(el => {
+        const context = getPropertyValue(el, "Element Context");
+        return context === "Instance";
+    });
+}
+
+async function fetchAndShowElements(id, cursor = null) {
     els.elements.classList.remove('hidden');
-    els.elementsResult.textContent = 'Loading elementsByElementGroup…';
     try {
-        const resp = await fetch(`/api/element-groups/${encodeURIComponent(id)}/elements`);
+        const url = `/api/element-groups/${encodeURIComponent(id)}/elements` + (cursor ? `?cursor=${encodeURIComponent(cursor)}` : '');
+        const resp = await fetch(url);
         const data = await resp.json();
-        els.elementsResult.textContent = JSON.stringify(data, null, 2);
+
+        const instances = filterInstanceElements(data);
+        elementsPaginationStack[elementsPaginationIndex] = { cursor: data.pagination?.cursor, elements: instances };
+
+        renderElementsTable(instances);
+        updateElementsPaginationButtons(data.pagination?.cursor);
     } catch (err) {
-        els.elementsResult.textContent = `Failed: ${err.message}`;
+        els.elementsPrevious.disabled = true;
+        els.elementsNext.disabled = true;
+        const tbody = els.elementsTable.querySelector('tbody');
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Error: ${err.message}</td></tr>`;
     }
+}
+
+function renderElementsTable(instances) {
+    const tbody = els.elementsTable.querySelector('tbody');
+    tbody.innerHTML = '';
+    for (const el of instances) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${escapeHtml(el.name)}</td>
+            <td>${escapeHtml(getPropertyValue(el, 'External ID'))}</td>
+            <td>${escapeHtml(getPropertyValue(el, 'Revit Category Type Id'))}</td>
+            <td>${escapeHtml(getPropertyValue(el, 'Family Name'))}</td>
+            <td>${escapeHtml(getPropertyValue(el, 'Revit Element ID'))}</td>
+        `;
+        tbody.appendChild(tr);
+    }
+}
+
+function updateElementsPaginationButtons(nextCursor) {
+    els.elementsPrevious.disabled = elementsPaginationIndex === 0;
+    els.elementsNext.disabled = !nextCursor;
+    els.elementsPageInfo.textContent = `Page ${elementsPaginationIndex + 1}`;
 }
 
 async function fetchAndShowDiff(id, startVersion) {
     els.diff.classList.remove('hidden');
-    els.diffResult.textContent = 'Loading diffElementGroupByVersionWithLatest…';
+    els.diffSummary.textContent = 'Loading diff…';
+    els.diffChangesList.innerHTML = '';
     try {
         const resp = await fetch(`/api/element-groups/${encodeURIComponent(id)}/diff?startVersion=${encodeURIComponent(startVersion)}`);
         const data = await resp.json();
-        els.diffResult.textContent = JSON.stringify(data, null, 2);
+
+        const result = data.result || [];
+        const added = result.filter(r => r.type === 'ADDITION').length;
+        const removed = result.filter(r => r.type === 'REMOVAL').length;
+        const modified = result.filter(r => r.type === 'MODIFICATION').length;
+
+        els.diffSummary.innerHTML = `<strong>${added} added</strong> • <strong>${removed} removed</strong> • <strong>${modified} modified</strong>`;
+
+        const table = document.createElement('table');
+        table.id = 'diffTable';
+        table.innerHTML = `<thead><tr><th>Type</th><th>Element</th><th>Details</th></tr></thead><tbody></tbody>`;
+        const tbody = table.querySelector('tbody');
+
+        for (const change of result) {
+            const tr = document.createElement('tr');
+            const elementName = escapeHtml(change.element?.name || 'Unknown');
+            let details = '';
+
+            if (change.differences?.results) {
+                const props = change.differences.results
+                    .map(p => `${escapeHtml(p.oldItem?.name || p.item?.name || 'Property')}: ${escapeHtml(p.oldItem?.value ?? '')} → ${escapeHtml(p.item?.value ?? '')}`)
+                    .join('; ');
+                details = props || 'No property changes';
+            }
+
+            tr.innerHTML = `<td>${change.type}</td><td>${elementName}</td><td>${details}</td>`;
+            tbody.appendChild(tr);
+        }
+
+        els.diffChangesList.appendChild(table);
     } catch (err) {
-        els.diffResult.textContent = `Failed: ${err.message}`;
+        els.diffSummary.innerHTML = `<span style="color:red;">Error: ${err.message}</span>`;
     }
 }
 
@@ -266,6 +345,22 @@ els.simulateDisconnect.addEventListener('click', async () => {
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({ clientId }),
         });
+    }
+});
+
+els.elementsPrevious.addEventListener('click', () => {
+    if (elementsPaginationIndex > 0) {
+        elementsPaginationIndex--;
+        const page = elementsPaginationStack[elementsPaginationIndex];
+        if (page) renderElementsTable(page.elements);
+        updateElementsPaginationButtons(page?.cursor);
+    }
+});
+
+els.elementsNext.addEventListener('click', () => {
+    if (trackedFile && elementsPaginationStack[elementsPaginationIndex]?.cursor) {
+        elementsPaginationIndex++;
+        fetchAndShowElements(trackedFile.elementGroupId, elementsPaginationStack[elementsPaginationIndex - 1].cursor);
     }
 });
 
