@@ -84,6 +84,12 @@ query ($elementGroupId: ID!, $startVersion: Int) {
       element {
         id
         name
+        properties {
+          results {
+            name
+            value
+          }
+        }
       }
       differences {
         pagination {
