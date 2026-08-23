@@ -254,7 +254,7 @@ async function fetchAndShowDiff(id, startVersion) {
 
         const table = document.createElement('table');
         table.id = 'diffTable';
-        table.innerHTML = `<thead><tr><th>Type</th><th>Element (Family Name + Name)</th><th>Revit Element ID</th><th>Details</th></tr></thead><tbody></tbody>`;
+        table.innerHTML = `<thead><tr><th>Type</th><th>Element (Family Name: Name)</th><th>Revit Element ID</th><th>Details</th></tr></thead><tbody></tbody>`;
         const tbody = table.querySelector('tbody');
 
         for (const change of result) {
@@ -262,7 +262,8 @@ async function fetchAndShowDiff(id, startVersion) {
             const elementName = escapeHtml(change.element?.name || 'Unknown');
             const familyName = escapeHtml(getPropertyValue(change.element, 'Family Name'));
             const revitElementId = escapeHtml(getPropertyValue(change.element, 'Revit Element ID'));
-            const elementDisplay = familyName !== '—' ? `${familyName} + ${elementName}` : elementName;
+            // Format: "Family Name: Element Name" (e.g., "Basic Wall: Generic - 200mm")
+            const elementDisplay = familyName !== '—' ? `${familyName}: ${elementName}` : elementName;
             let details = '';
 
             if (change.differences?.results) {
