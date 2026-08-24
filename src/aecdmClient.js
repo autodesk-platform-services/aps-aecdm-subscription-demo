@@ -15,10 +15,11 @@ export async function getElementsByElementGroup(elementGroupId, limit = 50, curs
   return data.elementsByElementGroup;
 }
 
-export async function getDiffAgainstLatest(elementGroupId, startVersion) {
+export async function getDiffAgainstLatest(elementGroupId, startVersion, versionType = 'PUBLISHED') {
   const data = await query(DIFF_ELEMENT_GROUP_BY_VERSION_WITH_LATEST, {
     elementGroupId,
     startVersion,
+    versionFilter: { versionType },
   });
   return data.diffElementGroupByVersionWithLatest;
 }

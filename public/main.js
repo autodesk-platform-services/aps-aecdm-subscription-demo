@@ -172,15 +172,19 @@ function onExtractionSuccess(elementGroup, fallbackFileUrn) {
 
     if (trackedFile?.elementGroupId !== id) return;
 
-    const versionChanged = entry.versionNumber !== trackedFile.lastVersionNumber ||
-        entry.wipVersionNumber !== trackedFile.lastWipVersionNumber;
+    const publishedChanged = entry.versionNumber !== trackedFile.lastVersionNumber;
+    const wipChanged = entry.wipVersionNumber !== trackedFile.lastWipVersionNumber;
+    const versionChanged = publishedChanged || wipChanged;
     if (!versionChanged) return;
 
-    const sinceVersion = trackedFile.lastVersionNumber;
+    // Determine which version type to query: if published changed, use PUBLISHED; otherwise use WIP
+    const versionType = publishedChanged ? 'PUBLISHED' : 'WIP';
+    const sinceVersion = versionType === 'PUBLISHED' ? trackedFile.lastVersionNumber : trackedFile.lastWipVersionNumber;
+
     trackedFile.lastVersionNumber = entry.versionNumber;
     trackedFile.lastWipVersionNumber = entry.wipVersionNumber;
     els.trackedSummary.textContent = `"${entry.name}" changed again — now at v${entry.versionNumber ?? '?'} / wip${entry.wipVersionNumber ?? '?'}.`;
-    fetchAndShowDiff(id, sinceVersion);
+    fetchAndShowDiff(id, sinceVersion, versionType);
 }
 
 function getPropertyValue(element, propName) {
@@ -236,12 +240,12 @@ function updateElementsPaginationButtons(nextCursor) {
     els.elementsPageInfo.textContent = `Page ${elementsPaginationIndex + 1}`;
 }
 
-async function fetchAndShowDiff(id, startVersion) {
+async function fetchAndShowDiff(id, startVersion, versionType = 'PUBLISHED') {
     els.diff.classList.remove('hidden');
     els.diffSummary.textContent = 'Loading diff…';
     els.diffChangesList.innerHTML = '';
     try {
-        const resp = await fetch(`/api/element-groups/${encodeURIComponent(id)}/diff?startVersion=${encodeURIComponent(startVersion)}`);
+        const resp = await fetch(`/api/element-groups/${encodeURIComponent(id)}/diff?startVersion=${encodeURIComponent(startVersion)}&versionType=${encodeURIComponent(versionType)}`);
         const data = await resp.json();
 
         const result = data.result || [];

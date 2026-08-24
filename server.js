@@ -137,7 +137,8 @@ app.get('/api/element-groups/:id/elements', async (req, res) => {
 
 app.get('/api/element-groups/:id/diff', async (req, res) => {
   try {
-    res.json(await getDiffAgainstLatest(req.params.id, Number(req.query.startVersion)));
+    const versionType = req.query.versionType || 'PUBLISHED';
+    res.json(await getDiffAgainstLatest(req.params.id, Number(req.query.startVersion), versionType));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

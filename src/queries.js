@@ -74,8 +74,8 @@ query ($fileUrn: ID!) {
 // `startVersion`, not `versionNumber`, and results nest under result[].differences.results[]
 // rather than flat elementsAdded/elementsRemoved/elementsModified lists.
 export const DIFF_ELEMENT_GROUP_BY_VERSION_WITH_LATEST = `
-query ($elementGroupId: ID!, $startVersion: Int) {
-  diffElementGroupByVersionWithLatest(elementGroupId: $elementGroupId, startVersion: $startVersion) {
+query ($elementGroupId: ID!, $startVersion: Int, $versionFilter: VersionFilterInput) {
+  diffElementGroupByVersionWithLatest(elementGroupId: $elementGroupId, startVersion: $startVersion, versionFilter: $versionFilter) {
     pagination {
       cursor
     }
