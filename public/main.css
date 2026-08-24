@@ -48,8 +48,13 @@ main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap:
 
 #diffTable { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
 #diffTable th, #diffTable td { padding: 6px 8px; border: 1px solid #ddd; text-align: left; }
-#diffTable th { background: #f5f5f5; font-weight: 600; }
+#diffTable th { background: #f5f5f5; font-weight: 600; position: sticky; top: 0; }
 #diffTable tbody tr:hover { background: #f9f9f9; }
+
+#diff table { display: block; overflow-y: auto; max-height: 250px; border: 1px solid #ddd; border-radius: 4px; }
+#diff thead { display: table; width: 100%; table-layout: fixed; }
+#diff tbody { display: block; overflow-y: scroll; }
+#diff tr { display: table; width: 100%; table-layout: fixed; }
 
 .pagination-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; font-size: 13px; }
 .pagination-controls button { padding: 4px 10px; font-size: 12px; }
