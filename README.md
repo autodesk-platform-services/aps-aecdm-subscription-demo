@@ -76,3 +76,13 @@ appear in the Discovered Files list.
 - `elementGroupExtractionStatus` (used for the polling-comparison feature)
   takes `fileUrn` directly rather than a wrapped `input` argument — confirmed
   against the reference sample's own testing notes.
+
+## Disclaimer
+
+This is a **sample application generated with Claude Code** to demonstrate the
+AEC Data Model Subscription API. It is provided as-is for educational and
+demonstration purposes. While efforts have been made to ensure correctness, this
+code has not been thoroughly tested in production environments and should be
+reviewed and validated before use in any production systems. Use at your own
+risk, and ensure proper error handling, security review, and testing for any
+deployment.
